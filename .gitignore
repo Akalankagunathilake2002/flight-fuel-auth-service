@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+.idea/
+
+grpc_generated/
+
+alembic/versions/*.py
+
+.DS_Store
