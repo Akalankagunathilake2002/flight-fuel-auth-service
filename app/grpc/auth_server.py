@@ -4,6 +4,9 @@ from concurrent import futures
 from app.grpc.generated import auth_pb2
 from app.grpc.generated import auth_pb2_grpc
 
+from app.db.database import SessionLocal
+from app.models.user import User
+
 
 class AuthService(auth_pb2_grpc.AuthServiceServicer):
 
@@ -13,10 +16,29 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
 
         print(f"Received username: {username}")
 
-        return auth_pb2.ValidateUserResponse(
-            exists=True,
-            username=username
-        )
+        db = SessionLocal()
+
+        try:
+
+            user = (
+                db.query(User)
+                .filter(User.username == username)
+                .first()
+            )
+
+            if user:
+                return auth_pb2.ValidateUserResponse(
+                    exists=True,
+                    username=user.username
+                )
+
+            return auth_pb2.ValidateUserResponse(
+                exists=False,
+                username=""
+            )
+
+        finally:
+            db.close()
 
 
 def serve():
